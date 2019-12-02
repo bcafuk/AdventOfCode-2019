@@ -6,3 +6,5 @@ This repository contains my solutions for the 2019 Advent of Code.
 ## Solutions
  1. [Day 1, part 1](day1/day1-part1.c)
  2. [Day 1, part 2](day1/day1-part2.c)
+ 3. [Day 2, part 1](day2/day2-part1.js)
+ 4. [Day 2, part 2](day2/day2-part2.js)
