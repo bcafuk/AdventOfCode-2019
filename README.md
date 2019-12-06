@@ -14,3 +14,5 @@ This repository contains my solutions for the 2019 Advent of Code.
  8. [Day 4, part 2](day4/day4-part2.c)
  9. [Day 5, part 1](day5/day5-part1.js)
 10. [Day 5, part 2](day5/day5-part2.js)
+11. [Day 6, part 1](day6/day6-part1.cpp)
+12. [Day 6, part 2](day6/day6-part2.cpp)
