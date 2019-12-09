@@ -1,13 +1,15 @@
 const readline = require('readline');
-const runCode = require('./runCode.js');
+const Computer = require('../common/intcode.js');
 
 const rl = readline.createInterface({
 	input: process.stdin,
 	output: process.stdout
 });
 
-rl.on('line', line => {
+rl.once('line', line => {
 	const intCode = line.split(',').map(n => Number(n));
-	
-	runCode(intCode, () => 5, n => console.log(n));
+
+	const computer = new Computer(intCode);
+	computer.enqueueInput(5);
+	computer.runUntilHalt();
 });

@@ -1,15 +1,21 @@
 const readline = require('readline');
-const runCode = require('./runCode.js');
+const Computer = require('../common/intcode.js');
 
 const rl = readline.createInterface({
 	input: process.stdin,
 	output: process.stdout
 });
 
-rl.on('line', line => {
+rl.once('line', line => {
 	const intCode = line.split(',').map(n => Number(n));
 	const noun = 12;
 	const verb = 2;
-	
-	console.log(runCode(intCode, noun, verb));
+
+	const computer = new Computer(intCode);
+	computer.memorySet(1, noun);
+	computer.memorySet(2, verb);
+
+	computer.runUntilHalt();
+
+	console.log(computer.memoryGet(0));
 });
