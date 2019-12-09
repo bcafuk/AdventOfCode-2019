@@ -5,36 +5,37 @@ class Computer {
 		this.ip = 0;
 		this.relativeBase = 0;
 	}
-	
+
 	enqueueInput(input) {
 		this.inputQueue.push(input);
 	}
-	
+
 	get(index) {
 		if (this.codeCopy[index] === undefined) {
 			return 0;
 		}
 		return this.codeCopy[index];
 	}
+
 	set(index, value) {
 		this.codeCopy[index] = value;
 	}
-	
+
 	runUntilHalt() {
 		const iterator = this.run();
 
-		for(const output of iterator) {
+		for (const output of iterator) {
 			console.log(output);
 		}
 	}
-	
-	*run() {
+
+	* run() {
 		while (true) {
 			let instruction = this.get(this.ip);
-			
+
 			let opcode = instruction % 100;
-			
-			switch(opcode) {
+
+			switch (opcode) {
 				case 1:
 				case 2:
 				case 7:
@@ -42,13 +43,13 @@ class Computer {
 					let op1Mode = Math.trunc(instruction / 100) % 10;
 					let op2Mode = Math.trunc(instruction / 1000) % 10;
 					let destMode = Math.trunc(instruction / 10000) % 10;
-					
+
 					let op1 = this.get(this.ip + 1);
 					let op2 = this.get(this.ip + 2);
 					let dest = this.get(this.ip + 3);
-					
+
 					this.ip += 4;
-					
+
 					switch (op1Mode) {
 						case 0:
 							op1 = this.get(op1);
@@ -82,7 +83,7 @@ class Computer {
 						default:
 							throw 'Unknown destination mode ' + op2Mode;
 					}
-					
+
 					if (opcode === 1) {
 						this.set(dest, op1 + op2)
 					} else if (opcode === 2) {
@@ -97,9 +98,9 @@ class Computer {
 				case 3: {
 					let destMode = Math.trunc(instruction / 100) % 10;
 					let dest = this.get(this.ip + 1);
-					
+
 					this.ip += 2;
-					
+
 					switch (destMode) {
 						case 0:
 							break;
@@ -109,20 +110,20 @@ class Computer {
 						default:
 							throw 'Unknown destination mode ' + op2Mode;
 					}
-					
+
 					if (this.inputQueue.length === 0) {
 						throw 'Input queue is empty';
 					}
-					
+
 					this.set(dest, this.inputQueue.shift())
 					break;
 				}
 				case 4: {
 					let opMode = Math.trunc(instruction / 100) % 10;
 					let op = this.get(this.ip + 1);
-					
+
 					this.ip += 2;
-					
+
 					switch (opMode) {
 						case 0:
 							op = this.get(op);
@@ -135,7 +136,7 @@ class Computer {
 						default:
 							throw 'Unknown parameter mode ' + opMode;
 					}
-					
+
 					yield op;
 					break;
 				}
@@ -143,12 +144,12 @@ class Computer {
 				case 6: {
 					let op1Mode = Math.trunc(instruction / 100) % 10;
 					let op2Mode = Math.trunc(instruction / 1000) % 10;
-					
+
 					let op1 = this.get(this.ip + 1);
 					let op2 = this.get(this.ip + 2);
-					
+
 					this.ip += 3;
-					
+
 					switch (op1Mode) {
 						case 0:
 							op1 = this.get(op1);
@@ -173,7 +174,7 @@ class Computer {
 						default:
 							throw 'Unknown parameter mode ' + op2Mode;
 					}
-					
+
 					if (
 						(opcode == 5 && op1) ||
 						(opcode == 6 && !op1)
@@ -185,9 +186,9 @@ class Computer {
 				case 9: {
 					let opMode = Math.trunc(instruction / 100) % 10;
 					let op = this.get(this.ip + 1);
-					
+
 					this.ip += 2;
-					
+
 					switch (opMode) {
 						case 0:
 							op = this.get(op);
@@ -200,7 +201,7 @@ class Computer {
 						default:
 							throw 'Unknown parameter mode ' + opMode;
 					}
-					
+
 					this.relativeBase += op;
 					break;
 				}
@@ -213,4 +214,5 @@ class Computer {
 		}
 	}
 }
+
 module.exports = Computer;

@@ -8,7 +8,7 @@ const rl = readline.createInterface({
 
 rl.on('line', line => {
 	const intCode = line.split(',').map(n => Number(n));
-	
+
 	const computer = new Computer(intCode);
 	computer.enqueueInput(5);
 	computer.runUntilHalt();
