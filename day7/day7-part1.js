@@ -6,7 +6,7 @@ const rl = readline.createInterface({
 	output: process.stdout
 });
 
-rl.on('line', line => {
+rl.once('line', line => {
 	const intCode = line.split(',').map(n => Number(n));
 
 	let maxOutput = -Infinity;
