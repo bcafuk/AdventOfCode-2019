@@ -2,23 +2,57 @@ class Computer {
 	constructor(intCode) {
 		this.codeCopy = [...intCode];
 		this.inputQueue = [];
-		this.ip = 0;
-		this.relativeBase = 0;
 	}
 
 	enqueueInput(input) {
 		this.inputQueue.push(input);
 	}
 
-	get(index) {
-		if (this.codeCopy[index] === undefined) {
+	memoryGet(address) {
+		if (this.codeCopy[address] === undefined) {
 			return 0;
 		}
-		return this.codeCopy[index];
+		return this.codeCopy[address];
 	}
 
-	set(index, value) {
-		this.codeCopy[index] = value;
+	memorySet(address, value) {
+		this.codeCopy[address] = value;
+	}
+
+	parameterGet(address, relativeBase, index) {
+		const instructionString = String(this.memoryGet(address));
+		const mode = Number(instructionString.charAt(instructionString.length - 3 - index));
+
+		const parameter = this.memoryGet(address + 1 + index);
+
+		switch (mode) {
+			case 0: // Position mode
+				return this.memoryGet(parameter);
+			case 1: // Immediate mode
+				return parameter;
+			case 2: // Relative mode
+				return this.memoryGet(parameter + relativeBase);
+			default:
+				throw 'Unknown source mode ' + mode;
+		}
+	}
+
+	parameterSet(address, relativeBase, index, value) {
+		const instructionString = String(this.memoryGet(address));
+		const mode = Number(instructionString.charAt(instructionString.length - 3 - index));
+
+		const parameter = this.memoryGet(address + 1 + index);
+
+		switch (mode) {
+			case 0: // Position mode
+				this.memorySet(parameter, value);
+				break;
+			case 2: // Relative mode
+				this.memorySet(parameter + relativeBase, value);
+				break;
+			default:
+				throw 'Unknown destination mode ' + mode;
+		}
 	}
 
 	runUntilHalt() {
@@ -30,186 +64,100 @@ class Computer {
 	}
 
 	* run() {
-		while (true) {
-			let instruction = this.get(this.ip);
+		let ip = 0;
+		let relativeBase = 0;
 
-			let opcode = instruction % 100;
+		while (true) {
+			const instruction = this.memoryGet(ip);
+
+			const opcode = instruction % 100;
 
 			switch (opcode) {
-				case 1:
-				case 2:
-				case 7:
-				case 8: {
-					let op1Mode = Math.trunc(instruction / 100) % 10;
-					let op2Mode = Math.trunc(instruction / 1000) % 10;
-					let destMode = Math.trunc(instruction / 10000) % 10;
+				case 1: {
+					let op1 = this.parameterGet(ip, relativeBase, 0);
+					let op2 = this.parameterGet(ip, relativeBase, 1);
+					this.parameterSet(ip, relativeBase, 2, op1 + op2);
 
-					let op1 = this.get(this.ip + 1);
-					let op2 = this.get(this.ip + 2);
-					let dest = this.get(this.ip + 3);
+					ip += 4;
+					break;
+				}
+				case 2: {
+					let op1 = this.parameterGet(ip, relativeBase, 0);
+					let op2 = this.parameterGet(ip, relativeBase, 1);
+					this.parameterSet(ip, relativeBase, 2, op1 * op2);
 
-					this.ip += 4;
-
-					switch (op1Mode) {
-						case 0:
-							op1 = this.get(op1);
-							break;
-						case 1:
-							break;
-						case 2:
-							op1 = this.get(op1 + this.relativeBase);
-							break;
-						default:
-							throw 'Unknown parameter mode ' + op1Mode;
-					}
-					switch (op2Mode) {
-						case 0:
-							op2 = this.get(op2);
-							break;
-						case 1:
-							break;
-						case 2:
-							op2 = this.get(op2 + this.relativeBase);
-							break;
-						default:
-							throw 'Unknown parameter mode ' + op2Mode;
-					}
-					switch (destMode) {
-						case 0:
-							break;
-						case 2:
-							dest = dest + this.relativeBase;
-							break;
-						default:
-							throw 'Unknown destination mode ' + destMode;
-					}
-
-					if (opcode === 1) {
-						this.set(dest, op1 + op2)
-					} else if (opcode === 2) {
-						this.set(dest, op1 * op2)
-					} else if (opcode === 7) {
-						this.set(dest, Number(op1 < op2))
-					} else if (opcode === 8) {
-						this.set(dest, Number(op1 === op2))
-					}
+					ip += 4;
 					break;
 				}
 				case 3: {
-					let destMode = Math.trunc(instruction / 100) % 10;
-					let dest = this.get(this.ip + 1);
-
-					this.ip += 2;
-
-					switch (destMode) {
-						case 0:
-							break;
-						case 2:
-							dest = dest + this.relativeBase;
-							break;
-						default:
-							throw 'Unknown destination mode ' + destMode;
-					}
-
 					if (this.inputQueue.length === 0) {
 						throw 'Input queue is empty';
 					}
 
-					this.set(dest, this.inputQueue.shift())
+					this.parameterSet(ip, relativeBase, 0, this.inputQueue.shift());
+
+					ip += 2;
 					break;
 				}
 				case 4: {
-					let opMode = Math.trunc(instruction / 100) % 10;
-					let op = this.get(this.ip + 1);
+					let op = this.parameterGet(ip, relativeBase, 0);
 
-					this.ip += 2;
-
-					switch (opMode) {
-						case 0:
-							op = this.get(op);
-							break;
-						case 1:
-							break;
-						case 2:
-							op = this.get(op + this.relativeBase);
-							break;
-						default:
-							throw 'Unknown parameter mode ' + opMode;
-					}
-
+					ip += 2;
 					yield op;
 					break;
 				}
-				case 5:
+				case 5: {
+					let op1 = this.parameterGet(ip, relativeBase, 0);
+					let op2 = this.parameterGet(ip, relativeBase, 1);
+
+					if (op1 !== 0) {
+						ip = op2;
+					} else {
+						ip += 3;
+					}
+					break;
+				}
 				case 6: {
-					let op1Mode = Math.trunc(instruction / 100) % 10;
-					let op2Mode = Math.trunc(instruction / 1000) % 10;
+					let op1 = this.parameterGet(ip, relativeBase, 0);
+					let op2 = this.parameterGet(ip, relativeBase, 1);
 
-					let op1 = this.get(this.ip + 1);
-					let op2 = this.get(this.ip + 2);
-
-					this.ip += 3;
-
-					switch (op1Mode) {
-						case 0:
-							op1 = this.get(op1);
-							break;
-						case 1:
-							break;
-						case 2:
-							op1 = this.get(op1 + this.relativeBase);
-							break;
-						default:
-							throw 'Unknown parameter mode ' + op1Mode;
+					if (op1 === 0) {
+						ip = op2;
+					} else {
+						ip += 3;
 					}
-					switch (op2Mode) {
-						case 0:
-							op2 = this.get(op2);
-							break;
-						case 1:
-							break;
-						case 2:
-							op2 = this.get(op2 + this.relativeBase);
-							break;
-						default:
-							throw 'Unknown parameter mode ' + op2Mode;
-					}
+					break;
+				}
+				case 7: {
+					let op1 = this.parameterGet(ip, relativeBase, 0);
+					let op2 = this.parameterGet(ip, relativeBase, 1);
+					this.parameterSet(ip, relativeBase, 2, Number(op1 < op2));
 
-					if (
-						(opcode === 5 && op1) ||
-						(opcode === 6 && !op1)
-					) {
-						this.ip = op2;
-					}
+					ip += 4;
+					break;
+				}
+				case 8: {
+					let op1 = this.parameterGet(ip, relativeBase, 0);
+					let op2 = this.parameterGet(ip, relativeBase, 1);
+					this.parameterSet(ip, relativeBase, 2, Number(op1 === op2));
+
+					ip += 4;
 					break;
 				}
 				case 9: {
-					let opMode = Math.trunc(instruction / 100) % 10;
-					let op = this.get(this.ip + 1);
+					const op = this.parameterGet(ip, relativeBase, 0);
+					relativeBase += op;
 
-					this.ip += 2;
-
-					switch (opMode) {
-						case 0:
-							op = this.get(op);
-							break;
-						case 1:
-							break;
-						case 2:
-							op = this.get(op + this.relativeBase);
-							break;
-						default:
-							throw 'Unknown parameter mode ' + opMode;
-					}
-
-					this.relativeBase += op;
+					ip += 2;
 					break;
 				}
-				case 99:
-					this.ip += 1;
+				case 99: {
+					ip += 1;
 					return;
-				default:
+				}
+				default: {
 					throw 'Unknown opcode ' + opcode;
+				}
 			}
 		}
 	}

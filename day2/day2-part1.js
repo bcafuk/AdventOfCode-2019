@@ -12,10 +12,10 @@ rl.on('line', line => {
 	const verb = 2;
 
 	const computer = new Computer(intCode);
-	computer.set(1, noun);
-	computer.set(2, verb);
+	computer.memorySet(1, noun);
+	computer.memorySet(2, verb);
 
 	computer.runUntilHalt();
 
-	console.log(computer.get(0));
+	console.log(computer.memoryGet(0));
 });
