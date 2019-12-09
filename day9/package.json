@@ -1,0 +1,9 @@
+{
+	"name": "AoC-2019-day9",
+	"private": true,
+	"scripts": {
+		"part1": "node day9-part1.js < input",
+		"part2": "node day9-part2.js < input"
+	},
+	"dependencies": {}
+}
