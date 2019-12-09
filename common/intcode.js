@@ -81,7 +81,7 @@ class Computer {
 							dest = dest + this.relativeBase;
 							break;
 						default:
-							throw 'Unknown destination mode ' + op2Mode;
+							throw 'Unknown destination mode ' + destMode;
 					}
 
 					if (opcode === 1) {
@@ -91,7 +91,7 @@ class Computer {
 					} else if (opcode === 7) {
 						this.set(dest, Number(op1 < op2))
 					} else if (opcode === 8) {
-						this.set(dest, Number(op1 == op2))
+						this.set(dest, Number(op1 === op2))
 					}
 					break;
 				}
@@ -108,7 +108,7 @@ class Computer {
 							dest = dest + this.relativeBase;
 							break;
 						default:
-							throw 'Unknown destination mode ' + op2Mode;
+							throw 'Unknown destination mode ' + destMode;
 					}
 
 					if (this.inputQueue.length === 0) {
@@ -176,8 +176,8 @@ class Computer {
 					}
 
 					if (
-						(opcode == 5 && op1) ||
-						(opcode == 6 && !op1)
+						(opcode === 5 && op1) ||
+						(opcode === 6 && !op1)
 					) {
 						this.ip = op2;
 					}
