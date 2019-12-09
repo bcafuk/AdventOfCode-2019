@@ -15,7 +15,7 @@ rl.on('line', line => {
 	computer.set(1, noun);
 	computer.set(2, verb);
 	
-	computer.run();
+	computer.runUntilHalt();
 	
 	console.log(computer.get(0));
 });

@@ -16,7 +16,7 @@ rl.on('line', line => {
 			computer.set(1, noun);
 			computer.set(2, verb);
 	
-			computer.run();
+			computer.runUntilHalt();
 			
 			const actualOutput = computer.get(0);
 			if (actualOutput === expectedOutput) {

@@ -11,12 +11,5 @@ rl.on('line', line => {
 	
 	const computer = new Computer(intCode);
 	computer.enqueueInput(1);
-	
-	while (true) {
-		const output = computer.run();
-		if (computer.halted) {
-			break;
-		}
-		console.log(output);
-	}
+	computer.runUntilHalt();
 });

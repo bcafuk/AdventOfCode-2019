@@ -28,13 +28,15 @@ rl.on('line', line => {
 		
 		let amplifiers = [];
 		for (let i = 0; i < 5; ++i) {
-			amplifiers[i] = new Computer(intCode);
-			amplifiers[i].enqueueInput(phases[i]);
+			const computer = new Computer(intCode);
+			const iterator = computer.run();
+			computer.enqueueInput(phases[i]);
+			amplifiers[i] = {computer, iterator};
 		}
 		
 		for (let i = 0; i < 5; ++i) {
-			amplifiers[i].enqueueInput(output);
-			output = amplifiers[i].run();
+			amplifiers[i].computer.enqueueInput(output);
+			output = amplifiers[i].iterator.next().value;
 		}
 		
 		maxOutput = Math.max(maxOutput, output);

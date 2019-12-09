@@ -20,8 +20,16 @@ class Computer {
 		this.codeCopy[index] = value;
 	}
 	
-	run() {
-		while (!this.halted) {
+	runUntilHalt() {
+		const iterator = this.run();
+
+		for(const output of iterator) {
+			console.log(output);
+		}
+	}
+	
+	*run() {
+		while (true) {
 			let instruction = this.get(this.ip);
 			
 			let opcode = instruction % 100;
@@ -128,8 +136,8 @@ class Computer {
 							throw 'Unknown parameter mode ' + opMode;
 					}
 					
-					this.halted = false;
-					return op;
+					yield op;
+					break;
 				}
 				case 5:
 				case 6: {
@@ -198,7 +206,6 @@ class Computer {
 				}
 				case 99:
 					this.ip += 1;
-					this.halted = true;
 					return;
 				default:
 					throw 'Unknown opcode ' + opcode;

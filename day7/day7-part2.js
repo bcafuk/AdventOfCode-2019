@@ -28,18 +28,20 @@ rl.on('line', line => {
 		
 		let amplifiers = [];
 		for (let i = 0; i < 5; ++i) {
-			amplifiers[i] = new Computer(intCode);
-			amplifiers[i].enqueueInput(phases[i]);
+			const computer = new Computer(intCode);
+			const iterator = computer.run();
+			computer.enqueueInput(phases[i]);
+			amplifiers[i] = {computer, iterator};
 		}
 		
 		feedbackLoop: while (true) {
 			for (let i = 0; i < 5; ++i) {
-				amplifiers[i].enqueueInput(output);
-				let out = amplifiers[i].run();
-				if (amplifiers[i].halted) {
+				amplifiers[i].computer.enqueueInput(output);
+				let next = amplifiers[i].iterator.next();
+				if (next.done) {
 					break feedbackLoop;
 				}
-				output = out;
+				output = next.value;
 			}
 		}
 		
