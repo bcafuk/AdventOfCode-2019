@@ -1,5 +1,5 @@
 const readline = require('readline');
-const Computer = require('./Computer.js');
+const Computer = require('../common/intcode.js');
 
 const rl = readline.createInterface({
 	input: process.stdin,

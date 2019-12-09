@@ -1,5 +1,5 @@
 const readline = require('readline');
-const runCode = require('./runCode.js');
+const Computer = require('../common/intcode.js');
 
 const rl = readline.createInterface({
 	input: process.stdin,
@@ -11,5 +11,11 @@ rl.on('line', line => {
 	const noun = 12;
 	const verb = 2;
 	
-	console.log(runCode(intCode, noun, verb));
+	const computer = new Computer(intCode);
+	computer.set(1, noun);
+	computer.set(2, verb);
+	
+	computer.run();
+	
+	console.log(computer.get(0));
 });

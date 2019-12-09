@@ -1,5 +1,5 @@
 const readline = require('readline');
-const Amplifier = require('./Amplifier.js');
+const Computer = require('../common/intcode.js');
 
 const rl = readline.createInterface({
 	input: process.stdin,
@@ -28,7 +28,7 @@ rl.on('line', line => {
 		
 		let amplifiers = [];
 		for (let i = 0; i < 5; ++i) {
-			amplifiers[i] = new Amplifier(intCode);
+			amplifiers[i] = new Computer(intCode);
 			amplifiers[i].enqueueInput(phases[i]);
 		}
 		
