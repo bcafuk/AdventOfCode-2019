@@ -28,3 +28,5 @@ This repository contains my solutions for the 2019 Advent of Code.
 22. [Day 11, part 2](day11/day11-part2.js)
 23. [Day 12, part 1](day12/day12-part1.c)
 24. [Day 12, part 2](day12/day12-part2.c)
+25. [Day 13, part 1](day13/day13-part1.js)
+26. [Day 13, part 2](day13/day13-part2.js)
