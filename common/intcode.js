@@ -1,6 +1,4 @@
-const defaultInputFunction = () => {
-	throw 'Input queue is empty';
-};
+const defaultInputFunction = () => {};
 
 class Computer {
 	constructor(intCode, inputFunction = defaultInputFunction) {
@@ -96,7 +94,14 @@ class Computer {
 				}
 				case 3: {
 					if (this.inputQueue.length === 0) {
-						this.enqueueInput(this.inputFunction(this));
+						const input = this.inputFunction(this);
+						if (input !== undefined) {
+							this.enqueueInput(input);
+						}
+
+						if (this.inputQueue.length === 0) {
+							throw 'Input queue is empty';
+						}
 					}
 
 					this.parameterSet(ip, relativeBase, 0, this.inputQueue.shift());
