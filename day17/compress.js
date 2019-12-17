@@ -1,4 +1,4 @@
-const {hasPrefix} = require('./arrayUtils.js');
+const {hasPrefix} = require('./arrayUtils');
 
 const transferWords = (words, data, compressed) => {
 	/*

@@ -1,5 +1,5 @@
-const loadReactions = require('./loadReactions.js');
-const countPrimary = require('./countPrimary.js');
+const loadReactions = require('./loadReactions');
+const countPrimary = require('./countPrimary');
 
 const primaryAmount = 1000000000000;
 

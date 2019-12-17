@@ -92,4 +92,4 @@ class Area {
 	}
 }
 
-module.exports = [Area, directions];
+module.exports = {Area, directions};

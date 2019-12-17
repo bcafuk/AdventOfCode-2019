@@ -1,6 +1,6 @@
 const readline = require('readline');
-const Computer = require('../common/intcode.js');
-const {splitArray} = require('./arrayUtils.js');
+const Computer = require('../common/intcode');
+const {splitArray} = require('./arrayUtils');
 
 const rl = readline.createInterface({
 	input: process.stdin,

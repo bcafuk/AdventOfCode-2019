@@ -1,6 +1,6 @@
 const readline = require('readline');
-const Computer = require('../common/intcode.js');
-const [Area, directions] = require('./Area.js');
+const Computer = require('../common/intcode');
+const {Area, directions} = require('./Area');
 
 const rl = readline.createInterface({
 	input: process.stdin,
