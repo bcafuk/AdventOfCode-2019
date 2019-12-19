@@ -29,3 +29,4 @@ from December 1st to December 25th, two each day. This repository contains my so
 | Day 16 | [Part 1](day16/day16-part1.c  ), [Part 2](day16/day16-part2.c  ) | C          |
 | Day 17 | [Part 1](day17/day17-part1.js ), [Part 2](day17/day17-part2.js ) | JavaScript |
 | Day 18 | [Part 1](day18/day18-part1.js )                                  | JavaScript |
+| Day 19 | [Part 1](day19/day19-part1.js ), [Part 2](day19/day19-part2.js ) | JavaScript |
