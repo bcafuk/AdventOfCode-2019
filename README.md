@@ -33,3 +33,4 @@ from December 1st to December 25th, two each day. This repository contains my so
 | Day 20 | [Part 1](day20/day20-part1.cpp), [Part 2](day20/day20-part2.cpp) | C++        |
 | Day 21 | [Part 1](day21/day21-part1.js ), [Part 2](day21/day21-part2.js ) | JavaScript |
 | Day 22 | [Part 1](day22/day22-part1.cpp), [Part 2](day22/day22-part2.cpp) | C++        |
+| Day 23 | [Part 1](day23/day23-part1.js ), [Part 2](day23/day23-part2.js ) | JavaScript |

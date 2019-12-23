@@ -5,6 +5,8 @@ class Computer {
 		this.codeCopy = [...intCode];
 		this.inputQueue = [];
 		this.inputFunction = inputFunction;
+		this.ip = 0;
+		this.relativeBase = 0;
 	}
 
 	enqueueInput(input) {
@@ -22,11 +24,11 @@ class Computer {
 		this.codeCopy[address] = value;
 	}
 
-	parameterGet(address, relativeBase, index) {
-		const instructionString = String(this.memoryGet(address));
+	parameterGet(index) {
+		const instructionString = String(this.memoryGet(this.ip));
 		const mode = Number(instructionString.charAt(instructionString.length - 3 - index));
 
-		const parameter = this.memoryGet(address + 1 + index);
+		const parameter = this.memoryGet(this.ip + 1 + index);
 
 		switch (mode) {
 			case 0: // Position mode
@@ -34,24 +36,24 @@ class Computer {
 			case 1: // Immediate mode
 				return parameter;
 			case 2: // Relative mode
-				return this.memoryGet(parameter + relativeBase);
+				return this.memoryGet(parameter + this.relativeBase);
 			default:
 				throw 'Unknown source mode ' + mode;
 		}
 	}
 
-	parameterSet(address, relativeBase, index, value) {
-		const instructionString = String(this.memoryGet(address));
+	parameterSet(index, value) {
+		const instructionString = String(this.memoryGet(this.ip));
 		const mode = Number(instructionString.charAt(instructionString.length - 3 - index));
 
-		const parameter = this.memoryGet(address + 1 + index);
+		const parameter = this.memoryGet(this.ip + 1 + index);
 
 		switch (mode) {
 			case 0: // Position mode
 				this.memorySet(parameter, value);
 				break;
 			case 2: // Relative mode
-				this.memorySet(parameter + relativeBase, value);
+				this.memorySet(parameter + this.relativeBase, value);
 				break;
 			default:
 				throw 'Unknown destination mode ' + mode;
@@ -66,108 +68,117 @@ class Computer {
 		}
 	}
 
-	* run() {
-		let ip = 0;
-		let relativeBase = 0;
+	runOneCycle() {
+		if (this.halted) {
+			return;
+		}
 
-		while (true) {
-			const instruction = this.memoryGet(ip);
+		const instruction = this.memoryGet(this.ip);
 
-			const opcode = instruction % 100;
+		const opcode = instruction % 100;
 
-			switch (opcode) {
-				case 1: {
-					let op1 = this.parameterGet(ip, relativeBase, 0);
-					let op2 = this.parameterGet(ip, relativeBase, 1);
-					this.parameterSet(ip, relativeBase, 2, op1 + op2);
+		switch (opcode) {
+			case 1: {
+				let op1 = this.parameterGet(0);
+				let op2 = this.parameterGet(1);
+				this.parameterSet(2, op1 + op2);
 
-					ip += 4;
-					break;
-				}
-				case 2: {
-					let op1 = this.parameterGet(ip, relativeBase, 0);
-					let op2 = this.parameterGet(ip, relativeBase, 1);
-					this.parameterSet(ip, relativeBase, 2, op1 * op2);
+				this.ip += 4;
+				return;
+			}
+			case 2: {
+				let op1 = this.parameterGet(0);
+				let op2 = this.parameterGet(1);
+				this.parameterSet(2, op1 * op2);
 
-					ip += 4;
-					break;
-				}
-				case 3: {
+				this.ip += 4;
+				return;
+			}
+			case 3: {
+				if (this.inputQueue.length === 0) {
+					const input = this.inputFunction(this);
+					if (input !== undefined) {
+						this.enqueueInput(input);
+					}
+
 					if (this.inputQueue.length === 0) {
-						const input = this.inputFunction(this);
-						if (input !== undefined) {
-							this.enqueueInput(input);
-						}
-
-						if (this.inputQueue.length === 0) {
-							throw 'Input queue is empty';
-						}
+						throw 'Input queue is empty';
 					}
+				}
 
-					this.parameterSet(ip, relativeBase, 0, this.inputQueue.shift());
+				this.parameterSet(0, this.inputQueue.shift());
 
-					ip += 2;
-					break;
-				}
-				case 4: {
-					let op = this.parameterGet(ip, relativeBase, 0);
+				this.ip += 2;
+				return;
+			}
+			case 4: {
+				let op = this.parameterGet(0);
 
-					ip += 2;
-					yield op;
-					break;
-				}
-				case 5: {
-					let op1 = this.parameterGet(ip, relativeBase, 0);
-					let op2 = this.parameterGet(ip, relativeBase, 1);
+				this.ip += 2;
+				return op;
+			}
+			case 5: {
+				let op1 = this.parameterGet(0);
+				let op2 = this.parameterGet(1);
 
-					if (op1 !== 0) {
-						ip = op2;
-					} else {
-						ip += 3;
-					}
-					break;
+				if (op1 !== 0) {
+					this.ip = op2;
+				} else {
+					this.ip += 3;
 				}
-				case 6: {
-					let op1 = this.parameterGet(ip, relativeBase, 0);
-					let op2 = this.parameterGet(ip, relativeBase, 1);
+				return;
+			}
+			case 6: {
+				let op1 = this.parameterGet(0);
+				let op2 = this.parameterGet(1);
 
-					if (op1 === 0) {
-						ip = op2;
-					} else {
-						ip += 3;
-					}
-					break;
+				if (op1 === 0) {
+					this.ip = op2;
+				} else {
+					this.ip += 3;
 				}
-				case 7: {
-					let op1 = this.parameterGet(ip, relativeBase, 0);
-					let op2 = this.parameterGet(ip, relativeBase, 1);
-					this.parameterSet(ip, relativeBase, 2, Number(op1 < op2));
+				return;
+			}
+			case 7: {
+				let op1 = this.parameterGet(0);
+				let op2 = this.parameterGet(1);
+				this.parameterSet(2, Number(op1 < op2));
 
-					ip += 4;
-					break;
-				}
-				case 8: {
-					let op1 = this.parameterGet(ip, relativeBase, 0);
-					let op2 = this.parameterGet(ip, relativeBase, 1);
-					this.parameterSet(ip, relativeBase, 2, Number(op1 === op2));
+				this.ip += 4;
+				return;
+			}
+			case 8: {
+				let op1 = this.parameterGet(0);
+				let op2 = this.parameterGet(1);
+				this.parameterSet(2, Number(op1 === op2));
 
-					ip += 4;
-					break;
-				}
-				case 9: {
-					const op = this.parameterGet(ip, relativeBase, 0);
-					relativeBase += op;
+				this.ip += 4;
+				return;
+			}
+			case 9: {
+				const op = this.parameterGet(0);
+				this.relativeBase += op;
 
-					ip += 2;
-					break;
-				}
-				case 99: {
-					ip += 1;
-					return;
-				}
-				default: {
-					throw 'Unknown opcode ' + opcode;
-				}
+				this.ip += 2;
+				return;
+			}
+			case 99: {
+				this.ip += 1;
+				this.halted = true;
+				return;
+			}
+			default: {
+				throw 'Unknown opcode ' + opcode;
+			}
+		}
+	}
+
+	* run() {
+		while (!this.halted) {
+			const output = this.runOneCycle();
+
+			if (output !== undefined) {
+				yield output;
 			}
 		}
 	}
